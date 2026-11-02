@@ -1,0 +1,39 @@
+{
+  "realm": "hr",
+  "enabled": true,
+  "sslRequired": "none",
+  "accessTokenLifespan": 900,
+  "roles": { "realm": [ {"name": "employee"}, {"name": "manager"}, {"name": "hr"} ] },
+  "clients": [
+    {
+      "clientId": "hr-frontend",
+      "enabled": true,
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "redirectUris": ["http://localhost:3000/*", "http://localhost:5173/*"],
+      "webOrigins": ["http://localhost:3000", "http://localhost:5173"],
+      "attributes": { "pkce.code.challenge.method": "S256" },
+      "protocolMappers": [
+        {
+          "name": "hr-assistant-audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "config": {
+            "included.custom.audience": "hr-assistant",
+            "access.token.claim": "true",
+            "id.token.claim": "false"
+          }
+        }
+      ]
+    }
+  ],
+  "users": [
+    { "username": "alice", "enabled": true, "emailVerified": true, "email": "alice@example.com", "firstName": "Alice", "lastName": "Employee",
+      "credentials": [{"type": "password", "value": "alice", "temporary": false}], "realmRoles": ["employee"] },
+    { "username": "bob", "enabled": true, "emailVerified": true, "email": "bob@example.com", "firstName": "Bob", "lastName": "Manager",
+      "credentials": [{"type": "password", "value": "bob", "temporary": false}], "realmRoles": ["manager"] },
+    { "username": "hradmin", "enabled": true, "emailVerified": true, "email": "hr@example.com", "firstName": "Hana", "lastName": "Admin",
+      "credentials": [{"type": "password", "value": "hradmin", "temporary": false}], "realmRoles": ["hr"] }
+  ]
+}

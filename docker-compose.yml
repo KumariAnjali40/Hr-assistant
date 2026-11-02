@@ -1,0 +1,100 @@
+name: hr-assistant
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: hr
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-hr}
+      POSTGRES_DB: hr
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hr"]
+      interval: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes: [redisdata:/data]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      retries: 10
+
+  qdrant:
+    image: qdrant/qdrant:v1.12.4
+    volumes: [qdrantdata:/qdrant/storage]
+
+  # --- Local LLM. If Ollama already runs on your host, delete the two ollama
+  # services and set OLLAMA_BASE_URL=http://host.docker.internal:11434 in .env
+  ollama:
+    image: ollama/ollama:latest
+    volumes: [ollama:/root/.ollama]
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 10s
+      retries: 10
+    # GPU (NVIDIA): uncomment
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices: [{driver: nvidia, count: all, capabilities: [gpu]}]
+
+  ollama-pull:
+    image: ollama/ollama:latest
+    depends_on:
+      ollama: {condition: service_healthy}
+    environment:
+      OLLAMA_HOST: ollama:11434
+    entrypoint: ["/bin/sh", "-c", "ollama pull ${CHAT_MODEL:-llama3.1:8b} && ollama pull ${EMBED_MODEL:-nomic-embed-text}"]
+    restart: "no"
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:25.0
+    command: ["start-dev", "--import-realm"]
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_HOSTNAME_STRICT: "false"
+    volumes:
+      - ./infra/keycloak/realm-hr.json:/opt/keycloak/data/import/realm-hr.json:ro
+    ports: ["8080:8080"]
+
+  api:
+    build: ./backend
+    env_file: .env
+    depends_on:
+      postgres: {condition: service_healthy}
+      redis: {condition: service_healthy}
+      qdrant: {condition: service_started}
+    volumes: [uploads:/data/uploads]
+    ports: ["8000:8000"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request as u; u.urlopen('http://localhost:8000/healthz')"]
+      interval: 15s
+      retries: 5
+
+  worker:
+    build: ./backend
+    command: ["celery", "-A", "app.worker.celery_app", "worker", "--loglevel=INFO", "--concurrency=2"]
+    env_file: .env
+    depends_on:
+      postgres: {condition: service_healthy}
+      redis: {condition: service_healthy}
+    volumes: [uploads:/data/uploads]
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_KEYCLOAK_URL: http://localhost:8080
+    depends_on: [api]
+    ports: ["3000:80"]
+
+volumes:
+  pgdata:
+  redisdata:
+  qdrantdata:
+  ollama:
+  uploads:

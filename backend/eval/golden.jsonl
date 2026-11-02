@@ -1,0 +1,10 @@
+{"q": "How many casual leaves do I get in a year?", "roles": ["employee"], "expect": "Leave Policy"}
+{"q": "Do I need a medical certificate for sick leave?", "roles": ["employee"], "expect": "Leave Policy"}
+{"q": "How much earned leave can I carry forward?", "roles": ["employee"], "expect": "Leave Policy"}
+{"q": "How long is maternity leave?", "roles": ["employee"], "expect": "Leave Policy"}
+{"q": "When is salary credited each month?", "roles": ["employee"], "expect": "Payroll Policy"}
+{"q": "What is the deadline for reimbursement claims?", "roles": ["employee"], "expect": "Payroll Policy"}
+{"q": "When do I need to submit tax investment declarations?", "roles": ["employee"], "expect": "Payroll Policy"}
+{"q": "What is the merit increase budget for my team?", "roles": ["manager"], "expect": "Compensation Review Guidelines"}
+{"q": "What is the merit increase budget for my team?", "roles": ["employee"], "forbid": "Compensation Review Guidelines"}
+{"q": "When do managers submit compensation recommendations?", "roles": ["employee"], "forbid": "Compensation Review Guidelines"}

@@ -1,0 +1,16 @@
+PAYROLL POLICY (Version 2.1)
+
+1. Salary credit date
+Salaries are credited on the last working day of every month. If the last day is a bank holiday, salary is credited on the preceding working day.
+
+2. Payslips
+Payslips are available on the HR portal by the 3rd of the following month.
+
+3. Reimbursements
+Reimbursement claims must be submitted with receipts by the 25th of the month to be processed with that month's payroll. Claims submitted later are processed in the next cycle.
+
+4. Tax declarations
+Investment declarations for tax savings must be submitted by 31 January. Proofs must be uploaded by 15 March.
+
+5. Salary queries
+For any discrepancy in salary, raise an HR ticket within 30 days of the payslip date.
